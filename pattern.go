@@ -1,30 +1,25 @@
 package gitignore
 
 import (
-	"github.com/danwakefield/fnmatch"
-	"regexp"
+	"path/filepath"
 	"strings"
 )
 
 type Pattern interface {
-	Match(path string, isDir bool) MatchResult
+	Match(path []string, isDir bool) MatchResult
 }
 
 type ptrn struct {
-	domain    string
-	pattern   string
-	re        *regexp.Regexp
+	domain    []string
+	pattern   []string
 	inclusion bool
 	dirOnly   bool
-	isFnMatch bool
+	isGlob    bool
 }
 
-func ParsePattern(pattern, domain string) (Pattern, error) {
-	if !strings.HasPrefix(domain, "/") {
-		domain = "/" + domain
-	}
-
+func ParsePattern(pattern string, domain []string) Pattern {
 	p := ptrn{domain: domain}
+
 	if strings.HasPrefix(pattern, "!") {
 		p.inclusion = true
 		pattern = pattern[1:]
@@ -37,41 +32,31 @@ func ParsePattern(pattern, domain string) (Pattern, error) {
 	if strings.HasSuffix(pattern, "/") {
 		p.dirOnly = true
 		pattern = pattern[:len(pattern)-1]
-	} else {
-		if re, err := regexp.Compile(p.pattern); err != nil {
-			return nil, err
-		} else {
-			p.re = re
-		}
 	}
 
 	if strings.Contains(pattern, "/") {
-		p.isFnMatch = true
+		p.isGlob = true
 	}
 
-	if strings.HasPrefix(pattern, "/") {
-		pattern = domain + pattern
-	}
-
-	p.pattern = pattern
-	return &p, nil
+	p.pattern = strings.Split(pattern, "/")
+	return &p
 }
 
-func (p *ptrn) Match(path string, isDir bool) MatchResult {
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
-	if !strings.HasPrefix(path, p.domain) || (p.dirOnly && !isDir) {
+func (p *ptrn) Match(path []string, isDir bool) MatchResult {
+	if len(path) <= len(p.domain) {
 		return NoMatch
 	}
-	if p.isFnMatch {
-		if !fnmatch.Match(p.pattern, path, fnmatch.FNM_PATHNAME) {
+	for i, e := range p.domain {
+		if path[i] != e {
 			return NoMatch
 		}
-	} else {
-		if !p.re.Match([]byte(path)) {
-			return NoMatch
-		}
+	}
+
+	path = path[len(p.domain):]
+	if p.isGlob && !p.globMatch(path, isDir) {
+		return NoMatch
+	} else if !p.isGlob && !p.simpleNameMatch(path, isDir) {
+		return NoMatch
 	}
 
 	if p.inclusion {
@@ -79,4 +64,66 @@ func (p *ptrn) Match(path string, isDir bool) MatchResult {
 	} else {
 		return Exclude
 	}
+}
+
+func (p *ptrn) simpleNameMatch(path []string, isDir bool) bool {
+	for i, name := range path {
+		if match, err := filepath.Match(p.pattern[0], name); err != nil {
+			return false
+		} else if !match {
+			continue
+		}
+		if p.dirOnly && !isDir && i == len(path)-1 {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
+func (p *ptrn) globMatch(path []string, isDir bool) bool {
+	matched := false
+	canTraverse := false
+	for i, pattern := range p.pattern {
+		if pattern == "" {
+			canTraverse = false
+			continue
+		}
+		if pattern == "**" {
+			if i == len(p.pattern)-1 {
+				break
+			}
+			canTraverse = true
+			continue
+		}
+		if strings.Contains(pattern, "**") {
+			return false
+		}
+		if len(path) == 0 {
+			return false
+		}
+		if canTraverse {
+			canTraverse = false
+			for len(path) > 0 {
+				e := path[0]
+				path = path[1:]
+				if match, err := filepath.Match(pattern, e); err != nil {
+					return false
+				} else if match {
+					matched = true
+					break
+				}
+			}
+		} else {
+			if match, err := filepath.Match(pattern, path[0]); err != nil || !match {
+				return false
+			}
+			matched = true
+			path = path[1:]
+		}
+	}
+	if matched && p.dirOnly && !isDir && len(path) == 0 {
+		matched = false
+	}
+	return matched
 }

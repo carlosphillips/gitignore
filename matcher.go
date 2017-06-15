@@ -22,10 +22,12 @@ type matcher struct {
 
 func (m *matcher) Match(path string, isDir bool) MatchResult {
 	var res MatchResult
-	for _, p := range m.patterns {
-		if pres := p.Match(path, isDir); pres > NoMatch {
-			res = pres
+	/*
+		  for _, p := range m.patterns {
+			  if pres := p.Match(path, isDir); pres > NoMatch {
+				  res = pres
+			  }
 		}
-	}
+	*/
 	return res
 }
