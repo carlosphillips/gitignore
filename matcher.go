@@ -9,9 +9,13 @@ const (
 )
 
 type Matcher interface {
-	Match(path string, isDir bool) MatchResult
+	Match(path []string, isDir bool) bool
 }
 
+// NewMatcher constructs a new global matcher. Patterns must be given in the order of
+// increasing priority. That is most generic settings files first, then the content of
+// the repo .gitignore, then content of .gitignore down the path or the repo and then
+// the content command line arguments.
 func NewMatcher(patterns []Pattern) Matcher {
 	return &matcher{patterns}
 }
@@ -20,14 +24,14 @@ type matcher struct {
 	patterns []Pattern
 }
 
-func (m *matcher) Match(path string, isDir bool) MatchResult {
-	var res MatchResult
-	/*
-		  for _, p := range m.patterns {
-			  if pres := p.Match(path, isDir); pres > NoMatch {
-				  res = pres
-			  }
+// Match matches patterns in the order of priorities. As soon as an inclusion or
+// exclusion is found, not further matching is performed.
+func (m *matcher) Match(path []string, isDir bool) bool {
+	n := len(m.patterns)
+	for i := n - 1; i >= 0; i-- {
+		if match := m.patterns[i].Match(path, isDir); match > NoMatch {
+			return match == Exclude
 		}
-	*/
-	return res
+	}
+	return false
 }
