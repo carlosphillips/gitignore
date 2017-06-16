@@ -1,3 +1,6 @@
+/**
+ * Copyright (c) Oleg Sklyar, Silvertern, 2017. MIT license
+ */
 package gitignore_test
 
 import (

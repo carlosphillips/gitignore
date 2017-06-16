@@ -1,3 +1,6 @@
+/**
+ * Copyright (c) Oleg Sklyar, Silvertern, 2017. MIT license
+ */
 package gitignore
 
 import (
@@ -5,7 +8,21 @@ import (
 	"strings"
 )
 
+// MatchResult defines outcomes of a match, no match, exclusion or inclusion.
+type MatchResult int
+
+const (
+	// NoMatch defines the no match outcome of a match check
+	NoMatch MatchResult = iota
+	// Exclude defines an exclusion of a file as a result of a match check
+	Exclude
+	// Exclude defines an explicit inclusion of a file as a result of a match check
+	Include
+)
+
+// Pattern defines a single gitignore pattern.
 type Pattern interface {
+	// Match matches the given path to the pattern.
 	Match(path []string, isDir bool) MatchResult
 }
 
@@ -17,6 +34,7 @@ type ptrn struct {
 	isGlob    bool
 }
 
+// ParsePattern parses a gitignore pattern string into the Pattern structure.
 func ParsePattern(pattern string, domain []string) Pattern {
 	p := ptrn{domain: domain}
 

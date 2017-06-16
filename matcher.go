@@ -1,14 +1,16 @@
+/**
+ * Copyright (c) Oleg Sklyar, Silvertern, 2017. MIT license
+ */
+
+// gitignore package implements scanning for and parsing of gitignore files in a directory
+// structure and matching parsed patterns to filesystem paths. All patterns listed in the
+// original gitignore specification are supported.
 package gitignore
 
-type MatchResult int
-
-const (
-	NoMatch MatchResult = iota
-	Exclude
-	Include
-)
-
+// Matcher defines a global multi-pattern matcher for gitignore patterns
 type Matcher interface {
+	// Match matches patterns in the order of priorities. As soon as an inclusion or
+	// exclusion is found, not further matching is performed.
 	Match(path []string, isDir bool) bool
 }
 
@@ -24,8 +26,6 @@ type matcher struct {
 	patterns []Pattern
 }
 
-// Match matches patterns in the order of priorities. As soon as an inclusion or
-// exclusion is found, not further matching is performed.
 func (m *matcher) Match(path []string, isDir bool) bool {
 	n := len(m.patterns)
 	for i := n - 1; i >= 0; i-- {
