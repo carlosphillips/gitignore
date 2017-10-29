@@ -1,6 +1,5 @@
-/**
- * Copyright (c) Oleg Sklyar, Silvertern, 2017. MIT license
- */
+// Copyright (c) 2017. Oleg Sklyar & teris.io. All rights reserved.
+// See the LICENSE file in the project root for licensing information.
 
 // gitignore package implements scanning for and parsing of gitignore files in a directory
 // structure and matching parsed patterns to filesystem paths. All patterns listed in the

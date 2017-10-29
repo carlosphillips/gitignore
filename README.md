@@ -1,4 +1,8 @@
-# `gitignore` parser and matcher for Go
+[![Build status][buildimage]][build] [![Coverage][codecovimage]][codecov] [![GoReportCard][cardimage]][card] [![API documentation][docsimage]][docs]
+
+# This project is parked and n longer maintained
+
+# git ignore parser and matcher for Go
  
 The module implements matching file system paths to gitignore patterns that can be automatically read from 
   a git repository tree in the order of definition priorities. It support all pattern formats as specified
@@ -59,8 +63,19 @@ zero or more directories. For example, "a/**/b" matches "a/b", "a/x/b",
 
 * Other consecutive asterisks are considered invalid.
 
-## License
+### License and copyright
 
-The code is released under the MIT license. The complete wording is available in the LICENSE file.
+	Copyright (c) 2017. Oleg Sklyar and teris.io. MIT license applies. All rights reserved.
 
-Copyright (c) Oleg Sklyar, Silvertern, 2017.
+
+[build]: https://travis-ci.org/teris-io/gitignore
+[buildimage]: https://travis-ci.org/teris-io/gitignore.svg?branch=master
+
+[codecov]: https://codecov.io/github/teris-io/gitignore?branch=master
+[codecovimage]: https://codecov.io/github/teris-io/gitignore/coverage.svg?branch=master
+
+[card]: http://goreportcard.com/report/teris-io/gitignore
+[cardimage]: https://goreportcard.com/badge/github.com/teris-io/gitignore
+
+[docs]: https://godoc.org/github.com/teris-io/gitignore
+[docsimage]: http://img.shields.io/badge/godoc-reference-blue.svg?style=flat

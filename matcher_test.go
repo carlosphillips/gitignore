@@ -1,10 +1,10 @@
-/**
- * Copyright (c) Oleg Sklyar, Silvertern, 2017. MIT license
- */
+// Copyright (c) 2017. Oleg Sklyar & teris.io. All rights reserved.
+// See the LICENSE file in the project root for licensing information.
+
 package gitignore_test
 
 import (
-	"github.com/silvertern/gitignore"
+	"github.com/teris-io/gitignore"
 	"testing"
 )
 
